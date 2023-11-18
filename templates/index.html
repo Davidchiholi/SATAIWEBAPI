@@ -1,0 +1,23 @@
+<!doctype html>
+<head>
+    <title>SPORT-A-TOUS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/sat512.png') }}">
+</head>
+<html>
+   <body>
+     <main>
+        <div class="px-4 py-3 my-2 text-center">
+            <img class="d-block mx-auto mb-4" src="{{ url_for('static', filename='images/sat-icon-color.png') }}" alt="Azure Logo" width="192" height="192"/>
+            <!-- <img  src="/docs/5.1/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> -->
+            <h1 class="display-6 fw-bold text-primary">Welcome to SPORT-A-TOUS</h1>            
+          </div>
+        <form method="post" action="{{url_for('hello')}}">
+            <div class="col-md-6 mx-auto text-center">
+                <label for="name" class="form-label fw-bold fs-5">Sport of all, for all</label>&nbsp;                          
+                <label for="name" class="form-label fw-bold fs-5">2023.11.18 09.00</label>                         
+            </div>
+        </form>
+     </main>      
+   </body>
+</html>

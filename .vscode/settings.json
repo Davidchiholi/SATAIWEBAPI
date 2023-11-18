@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/a77cb6e1-6271-4496-a4e2-b3a71dd31260/resourceGroups/SAT_SPONSOR/providers/Microsoft.Web/sites/sportatousaiapp",
+    "appService.deploySubpath": "."
+}
