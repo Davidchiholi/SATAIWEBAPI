@@ -31,6 +31,12 @@ def hello():
 
 @app.route('/posechecksat', methods=['GET'])
 def posechecksat():
+    model = request.args.get('model')    
+    equip = request.args.get('equip')
+    model1 = request.args.get('model1')    
+    equip1 = request.args.get('equip1')
+    model2 = request.args.get('model2')    
+    equip2 = request.args.get('equip2')
     inputbenchmarkfile = request.args.get('inputbenchmarkfile')
     inputbenchmarkblobcontainer = request.args.get('inputbenchmarkblobcontainer')
     inputplayerblobcontainer = request.args.get('inputplayerblobcontainer')
@@ -61,7 +67,7 @@ def posechecksat():
     try:
         if (blobconn.startswith('DefaultEndpointsProtocol=https;AccountName=sportatousblob;') or blobconn == ''):
 #            print('Request for ai pose comparison')
-            returncode = compare_positions(inputbenchmarkfile, inputplayerfile, inputbenchmarkblobcontainer, inputplayerblobcontainer, outputblobfilename ,outputblobfullfilename,outputblobcontainer,checkrate,blobconn,sport, False, True, deletedblob)
+            returncode = compare_positions(inputbenchmarkfile, inputplayerfile, inputbenchmarkblobcontainer, inputplayerblobcontainer, outputblobfilename ,outputblobfullfilename,outputblobcontainer,checkrate,blobconn,sport, False, True, deletedblob, model, equip, model1, equip1, model2, equip2)
             return make_response(jsonify(returncode), 200)
         else:
             return  make_response(jsonify(-1), 400)

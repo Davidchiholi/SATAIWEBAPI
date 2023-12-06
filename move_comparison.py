@@ -7,7 +7,7 @@ from fastdtw import fastdtw
 from azure.storage.blob import ContainerClient
 
 
-def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user_blobcontainer, output_filename, output_fullname, blob_containername, check_rate, blob_connection, sport, show_window, combine_result, deleted_blob):
+def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user_blobcontainer, output_filename, output_fullname, blob_containername, check_rate, blob_connection, sport, show_window, combine_result, deleted_blob, model, equip, model1, equip1, model2, equip2):
 	if (benchmark_video=='' or user_video==''):
 		return 0
 
