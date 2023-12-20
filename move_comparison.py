@@ -2,10 +2,58 @@ import cv2, time
 import os
 import random
 import pose_module as pm
+##new code begin
+import numpy as np
+import mediapipe as mp
+##new code end
 from scipy.spatial.distance import cosine
 from fastdtw import fastdtw
 from azure.storage.blob import ContainerClient
+##new code begin
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
+##new code end
 
+def visualize(
+        image,
+        detection_result,
+        catg_name_lookup
+        ) -> np.ndarray:
+    ##Draws bounding boxes on the input image and return it.
+    ##   Args:
+    ##        image: The input RGB image.
+    ##        detection_result: The list of all "Detection" entities to be visualize.
+    ##    Returns:
+    ##        Image with bounding boxes.
+
+        probability = -1
+        detection_coords = ((0, 0),(0, 0))
+		
+        for detection in detection_result.detections:
+        # Draw bounding_box
+            # Draw label and score
+            category = detection.categories[0]
+            category_name = category.category_name
+            if (catg_name_lookup.lower() == category_name.lower()):
+                probability = round(category.score, 2)
+                if (probability > 0.20):
+                    bbox = detection.bounding_box
+                    start_point = bbox.origin_x, bbox.origin_y
+                    end_point = bbox.origin_x + bbox.width, bbox.origin_y + bbox.height
+                    detection_coords = ((bbox.origin_x, bbox.origin_y),
+												(bbox.origin_x + bbox.width, bbox.origin_y + bbox.height))
+                    cv2.rectangle(image, start_point, end_point, cv2.COLOR_BGR2RGB, 3)
+                #    result_text = category_name + ' (' + str(probability) + ')'
+                #    text_location = (MARGIN + bbox.origin_x,
+                #                 MARGIN + ROW_SIZE + bbox.origin_y)
+                #    cv2.putText(image, result_text, text_location, cv2.FONT_HERSHEY_PLAIN,
+                #        FONT_SIZE, TEXT_COLOR, FONT_THICKNESS)
+                else:
+                    probability=-1
+                    detection_coords = ((0, 0),(0, 0))
+                break
+
+        return image , detection_coords, probability
 
 def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user_blobcontainer, output_filename, output_fullname, blob_containername, check_rate, blob_connection, sport, show_window, combine_result, deleted_blob, model, equip, model1, equip1, model2, equip2):
 	if (benchmark_video=='' or user_video==''):
@@ -48,6 +96,16 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 			out = cv2.VideoWriter(output_filename, fourcc, 25, (nw1, nh1))
 			
 	fps_time = 0 #Initializing fps to 0
+
+##new code
+	if model != '':
+		base_options = python.BaseOptions(model_asset_path=model)
+	else:
+		base_options = python.BaseOptions(model_asset_path='efficientdet.tflite')
+	options = vision.ObjectDetectorOptions(base_options=base_options,
+									score_threshold=0.5)
+	mp_object_detection = vision.ObjectDetector.create_from_options(options)
+##new code
 
 	detector_1 = pm.poseDetector()
 	detector_2 = pm.poseDetector()
@@ -110,6 +168,30 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 				error_Show = error
 				if error_F < error:
 					error_Show = error_F
+
+				#newcoding begin
+				if model != '':
+					# Initialize the MediaPipe Object Detector with the SSD MobileNetV2 model
+
+					rgb_image1 = cv2.cvtColor(image_1, cv2.COLOR_BGR2RGB)
+					mp_image1 = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_image1)
+					resultsobj1 = mp_object_detection.detect(mp_image1)
+					
+					rgb_image2 = cv2.cvtColor(image_2, cv2.COLOR_BGR2RGB)
+					mp_image2 = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_image2)
+					resultsobj2 = mp_object_detection.detect(mp_image2)
+					
+					image_1, detection1_coords , probability1 = visualize(image_1,resultsobj1,equip)
+					image_2, detection2_coords , probability2 = visualize(image_2,resultsobj2,equip)
+								
+					if probability1 != -1 and probability2 != -1:
+						# Compute the distance between the two detections using FastDTW
+						error_equip, _ = fastdtw(detection1_coords, detection2_coords, dist=cosine)
+						error_Show = (error_Show * 0.85) + (error_equip * 0.15)
+					else:
+						if probability1 != -1 or probability2 != -1:
+							error_Show = (error_Show * 0.85) 
+				#newcoding end
 
 				# Displaying the error percentage
 				positionWrite = nh1 - 245
