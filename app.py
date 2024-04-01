@@ -48,30 +48,35 @@ def posechecksat():
     blobconn = request.args.get('blobconn')
     deletedblob= request.args.get('deletedblob')
     sport = request.args.get('sport')
+    if model =='NA':
+        model = ''
+    if model1 =='NA':
+        model1 = ''
+    if model2 =='NA':
+        model2 = ''
 
 #    blobcheckname = 'https://sportatousblob.blob.core.windows.net/'
 
     ## below this we need to commnent them out
 
-    blobconn='DefaultEndpointsProtocol=https;AccountName=sportatousblob;AccountKey=IyFEVlARtfoLlOQzQs/yapX3LIzMuK9rsIfWlojDiOzPmyEfHwgk+hXcVPYWwOie61pypEXcq5Ip+AStoEwOng==;EndpointSuffix=core.windows.net'
-    inputbenchmarkfile = 'pla/1/video/pvm/pvmvideo_pvm_videofn_golf_1.mp4'
-    inputplayerfile = 'pla/1/video/pvmi/pvmvio_pvm_videofniuid_1_golf_1.mp4' # replace with 0 for webcam
-    outputblobfilename = 'out_pvmvio_pvm_videofniuid_1_golf_1.mp4'
-    outputblobpath = 'pla/1/video/pvmo/'  
-    outputblobfullfilename='pla/1/video/pvmo/out_pvmvio_pvm_videofniuid_1_golf_1.mp4'
-    outputblobcontainer='satprdfalse'
-    inputbenchmarkblobcontainer='satprdfalse'
-    inputplayerblobcontainer='satprdfalse'
-    checkrate=0.150000
-    sport='GOLF'
-    model='NA'
-    model1='NA'
-    model2='NA'
-    equip='NA'
-    equip1='NA'
-    equip2='NA'
+ #   blobconn='DefaultEndpointsProtocol=https;AccountName=sportatousblob;AccountKey=IyFEVlARtfoLlOQzQs/yapX3LIzMuK9rsIfWlojDiOzPmyEfHwgk+hXcVPYWwOie61pypEXcq5Ip+AStoEwOng==;EndpointSuffix=core.windows.net'
+ #   inputbenchmarkfile = 'pla/1/video/pvm/pvmvideo_pvm_videofn_golf_1.mp4'
+ #   inputplayerfile = 'pla/1/video/pvmi/pvmvio_pvm_videofniuid_1_golf_1.mp4' # replace with 0 for webcam
+ #   outputblobfilename = 'out_pvmvio_pvm_videofniuid_1_golf_1.mp4'
+ #   outputblobpath = 'pla/1/video/pvmo/'  
+ #   outputblobfullfilename='pla/1/video/pvmo/out_pvmvio_pvm_videofniuid_1_golf_1.mp4'
+ #   outputblobcontainer='satprdfalse'
+ #   inputbenchmarkblobcontainer='satprdfalse'
+ #   inputplayerblobcontainer='satprdfalse'
+ #   checkrate=0.150000
+ #   sport='GOLF'
+ #   model=''
+ #   model1=''
+ #   model2=''
+ #   equip='NA'
+ #   equip1='NA'
+ #   equip2='NA'
     
-
     try:
         if (blobconn.startswith('DefaultEndpointsProtocol=https;AccountName=sportatousblob;') or blobconn == ''):
 #            print('Request for ai pose comparison')

@@ -100,11 +100,14 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 ##new code
 	if model != '':
 		base_options = python.BaseOptions(model_asset_path=model)
-	else:
-		base_options = python.BaseOptions(model_asset_path='efficientdet.tflite')
-	options = vision.ObjectDetectorOptions(base_options=base_options,
+		options = vision.ObjectDetectorOptions(base_options=base_options,
 									score_threshold=0.5)
-	mp_object_detection = vision.ObjectDetector.create_from_options(options)
+		mp_object_detection = vision.ObjectDetector.create_from_options(options)
+#	else:
+#		base_options = python.BaseOptions(model_asset_path='efficientdet.tflite')
+#	options = vision.ObjectDetectorOptions(base_options=base_options,
+#									score_threshold=0.5)
+#	mp_object_detection = vision.ObjectDetector.create_from_options(options)
 ##new code
 
 	detector_1 = pm.poseDetector()
