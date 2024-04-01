@@ -53,16 +53,24 @@ def posechecksat():
 
     ## below this we need to commnent them out
 
-#    blobconn='DefaultEndpointsProtocol=https;AccountName=sportatousblob;AccountKey=IyFEVlARtfoLlOQzQs/yapX3LIzMuK9rsIfWlojDiOzPmyEfHwgk+hXcVPYWwOie61pypEXcq5Ip+AStoEwOng==;EndpointSuffix=core.windows.net'
-#    inputbenchmarkfile = 'pla/1/video/mati/matplavideo_mat_videofni1_1.mp4'
-#    inputplayerfile = 'pla/7/video/mdti/mdtvideo_mdt_videofni7_5202307091526.mp4' # replace with 0 for webcam
-#    outputblobfilename = 'out_mdtvideo_mdt_videofni7_5202307091526.mp4'
-#    outputblobfullfilename='pla/7/video/mdto/out_mdtvideo_mdt_videofni7_5202307091526.mp4'
-#    outputblobcontainer='satprdfalse'
-#    inputbenchmarkblobcontainer='satprdfalse'
-#    inputplayerblobcontainer='satprdfalse'
-#    checkrate=60
-#    sport='abc'
+    blobconn='DefaultEndpointsProtocol=https;AccountName=sportatousblob;AccountKey=IyFEVlARtfoLlOQzQs/yapX3LIzMuK9rsIfWlojDiOzPmyEfHwgk+hXcVPYWwOie61pypEXcq5Ip+AStoEwOng==;EndpointSuffix=core.windows.net'
+    inputbenchmarkfile = 'pla/1/video/pvm/pvmvideo_pvm_videofn_golf_1.mp4'
+    inputplayerfile = 'pla/1/video/pvmi/pvmvio_pvm_videofniuid_1_golf_1.mp4' # replace with 0 for webcam
+    outputblobfilename = 'out_pvmvio_pvm_videofniuid_1_golf_1.mp4'
+    outputblobpath = 'pla/1/video/pvmo/'  
+    outputblobfullfilename='pla/1/video/pvmo/out_pvmvio_pvm_videofniuid_1_golf_1.mp4'
+    outputblobcontainer='satprdfalse'
+    inputbenchmarkblobcontainer='satprdfalse'
+    inputplayerblobcontainer='satprdfalse'
+    checkrate=0.150000
+    sport='GOLF'
+    model='efficientdet.tflite'
+    model1='NA'
+    model2='NA'
+    equip='golf+club'
+    equip1='NA'
+    equip2='NA'
+    
 
     try:
         if (blobconn.startswith('DefaultEndpointsProtocol=https;AccountName=sportatousblob;') or blobconn == ''):
