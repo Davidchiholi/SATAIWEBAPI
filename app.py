@@ -44,7 +44,7 @@ def posechecksat():
     outputblobfilename = request.args.get('outputblobfilename')
     outputblobfullfilename = request.args.get('outputblobfullfilename')
     outputblobcontainer = request.args.get('outputblobcontainer')
-    checkrate =  Decimal(request.args.get('checkrate'))
+    checkrate =  request.args.get('checkrate')
     blobconn = request.args.get('blobconn')
     deletedblob= request.args.get('deletedblob')
     sport = request.args.get('sport')
@@ -64,10 +64,10 @@ def posechecksat():
     inputplayerblobcontainer='satprdfalse'
     checkrate=0.150000
     sport='GOLF'
-    model='efficientdet.tflite'
+    model='NA'
     model1='NA'
     model2='NA'
-    equip='golf+club'
+    equip='NA'
     equip1='NA'
     equip2='NA'
     
