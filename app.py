@@ -54,7 +54,8 @@ def posechecksat():
         model1 = ''
     if model2 == 'NA':
         model2 = ''
-    checkrate = 0.1
+    checkrate_in_decimal = Decimal(checkrate.replace(',','.'))
+#    checkrate = 0.1
 
 #    blobcheckname = 'https://sportatousblob.blob.core.windows.net/'
 
@@ -81,7 +82,7 @@ def posechecksat():
     try:
         if (blobconn.startswith('DefaultEndpointsProtocol=https;AccountName=sportatousblob;') or blobconn == ''):
 #            print('Request for ai pose comparison')
-            returncode = compare_positions(inputbenchmarkfile, inputplayerfile, inputbenchmarkblobcontainer, inputplayerblobcontainer, outputblobfilename ,outputblobfullfilename,outputblobcontainer,checkrate,blobconn,sport, False, True, deletedblob, model, equip, model1, equip1, model2, equip2)
+            returncode = compare_positions(inputbenchmarkfile, inputplayerfile, inputbenchmarkblobcontainer, inputplayerblobcontainer, outputblobfilename ,outputblobfullfilename,outputblobcontainer,checkrate_in_decimal,blobconn,sport, False, True, deletedblob, model, equip, model1, equip1, model2, equip2)
             return make_response(jsonify(returncode), 200)
         else:
             return  make_response(jsonify(-1), 400)
