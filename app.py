@@ -48,12 +48,13 @@ def posechecksat():
     blobconn = request.args.get('blobconn')
     deletedblob= request.args.get('deletedblob')
     sport = request.args.get('sport')
-    if model =='NA':
+    if model == 'NA':
         model = ''
-    if model1 =='NA':
+    if model1 == 'NA':
         model1 = ''
-    if model2 =='NA':
+    if model2 == 'NA':
         model2 = ''
+    checkrate = 0.1
 
 #    blobcheckname = 'https://sportatousblob.blob.core.windows.net/'
 
