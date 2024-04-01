@@ -54,7 +54,7 @@ def posechecksat():
         model1 = ''
     if model2 == 'NA':
         model2 = ''
-    checkrate_in_decimal = Decimal(checkrate.replace(',','.'))
+    checkrate_in_decimal = Decimal(checkrate)
 #    checkrate = 0.1
 
 #    blobcheckname = 'https://sportatousblob.blob.core.windows.net/'
