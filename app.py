@@ -61,7 +61,6 @@ def posechecksat():
 
     ## below this we need to commnent them out
 
- #   blobconn='DefaultEndpointsProtocol=https;AccountName=sportatousblob;AccountKey=IyFEVlARtfoLlOQzQs/yapX3LIzMuK9rsIfWlojDiOzPmyEfHwgk+hXcVPYWwOie61pypEXcq5Ip+AStoEwOng==;EndpointSuffix=core.windows.net'
  #   inputbenchmarkfile = 'pla/1/video/pvm/pvmvideo_pvm_videofn_golf_1.mp4'
  #   inputplayerfile = 'pla/1/video/pvmi/pvmvio_pvm_videofniuid_1_golf_1.mp4' # replace with 0 for webcam
  #   outputblobfilename = 'out_pvmvio_pvm_videofniuid_1_golf_1.mp4'
