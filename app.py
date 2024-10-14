@@ -48,6 +48,7 @@ def posechecksat():
     blobconn = request.args.get('blobconn')
     deletedblob= request.args.get('deletedblob')
     sport = request.args.get('sport')
+    joints = request.args.get('joints')
     if model == 'NA':
         model = ''
     if model1 == 'NA':
@@ -77,11 +78,21 @@ def posechecksat():
  #   equip='NA'
  #   equip1='NA'
  #   equip2='NA'
+    joints_dict = {}
+    joints_list = joints.split(",")
+    joints_dict["joint1"] = joints_list[0]
+    joints_dict["joint1_weighting"] = joints_list[1]
+    joints_dict["joint2"] = joints_list[2]
+    joints_dict["joint2_weighting"] = joints_list[3]
+    joints_dict["joint3"] = joints_list[4]
+    joints_dict["joint3_weighting"] = joints_list[4]
+    joints_dict["joint4"] = joints_list[6]
+    joints_dict["joint4_weighting"] = joints_list[7]            
     
     try:
         if (blobconn.startswith('DefaultEndpointsProtocol=https;AccountName=sportatousblob;') or blobconn == ''):
 #            print('Request for ai pose comparison')
-            returncode = compare_positions(inputbenchmarkfile, inputplayerfile, inputbenchmarkblobcontainer, inputplayerblobcontainer, outputblobfilename ,outputblobfullfilename,outputblobcontainer,checkrate_in_decimal,blobconn,sport, False, True, deletedblob, model, equip, model1, equip1, model2, equip2)
+            returncode = compare_positions(inputbenchmarkfile, inputplayerfile, inputbenchmarkblobcontainer, inputplayerblobcontainer, outputblobfilename ,outputblobfullfilename,outputblobcontainer,checkrate_in_decimal,blobconn,sport, False, True, deletedblob, model, equip, model1, equip1, model2, equip2, joints_dict)
             return make_response(jsonify(returncode), 200)
         else:
             return  make_response(jsonify(-1), 400)

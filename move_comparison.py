@@ -1,3 +1,5 @@
+import array
+import json
 import cv2, time
 import os
 import random
@@ -6,6 +8,19 @@ import pose_module as pm
 import numpy as np
 import mediapipe as mp
 ##new code end
+import sys
+from calclib.mp_data_extract_util import read_landmark_positions_3d
+from calclib.mp_data_extract_util import read_exact_landmark_positions_2d
+from calclib.mp_data_extract_util import get_mp_position_timeseries
+from calclib.mp_data_extract_util import read_world_landmark_positions_3d
+from calclib.motion_calc_util import avg_speed_in_1_std
+from calclib.motion_calc_util import avg_speed
+from calclib.motion_calc_util import all_angle
+from calclib.motion_calc_util import all_speed
+from calclib.motion_calc_util import calculate_acceleration
+from calclib.motion_calc_util import get_distinance_of_two_joint
+from calclib.motion_calc_util import get_avg_distinance_of_two_joint
+from calclib.motion_calc_util import calc_speed_on_weighting
 from scipy.spatial.distance import cosine
 from fastdtw import fastdtw
 from azure.storage.blob import ContainerClient
@@ -55,7 +70,7 @@ def visualize(
 
         return image , detection_coords, probability
 
-def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user_blobcontainer, output_filename, output_fullname, blob_containername, check_rate, blob_connection, sport, show_window, combine_result, deleted_blob, model, equip, model1, equip1, model2, equip2):
+def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user_blobcontainer, output_filename, output_fullname, blob_containername, check_rate, blob_connection, sport, show_window, combine_result, deleted_blob, model, equip, model1, equip1, model2, equip2, joints_dict):
 	if (benchmark_video=='' or user_video==''):
 		return 0
 
@@ -75,6 +90,18 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 	h2 = int(benchmark_cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
 	w1 = int(user_cam.get(cv2.CAP_PROP_FRAME_WIDTH))
 	h1 = int(user_cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
+	#ADD
+	mp_pose = mp.solutions.pose 
+	pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) 
+	all_2d_points_user = list()
+	all_3d_world_points_user = list()
+	all_2d_points_benchmark = list()
+	all_3d_world_points_benchmark = list()
+	prev_speed_user = 0
+	frame_fps_user = int(user_cam.get(5))  #fps
+	frame_fps_benchmark = int(benchmark_cam.get(5))  #fps
+	#ADD===END
+
 	if h1 > w1:
 		nh1 = 720
 		nw1 = int(w1/h1*nh1)
@@ -164,6 +191,31 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 			del lmList_benchmark_F[1:11]
 
 			frame_counter += 1
+			
+			#ADD===
+			results = pose.process(image_1)
+			allpoints = (read_exact_landmark_positions_2d(results, w1, h1))
+			#print(allpoints)
+			allpoints_3d_world = (read_world_landmark_positions_3d(results))
+			all_2d_points_user.append(allpoints)
+			all_3d_world_points_user.append(allpoints_3d_world)
+			results = pose.process(image_2)
+			allpoints = (read_exact_landmark_positions_2d(results, w2, h2))
+			allpoints_3d_world = (read_world_landmark_positions_3d(results))
+			all_2d_points_benchmark.append(allpoints)
+			all_3d_world_points_benchmark.append(allpoints_3d_world)
+
+			#input joints point & weighting to calc speed
+			speed_user = calc_speed_on_weighting(all_2d_points_user, 1/frame_fps_user, joints_dict["joint1"], joints_dict["joint1_weighting"],joints_dict["joint2"], joints_dict["joint2_weighting"], joints_dict["joint3"], joints_dict["joint3_weighting"], joints_dict["joint4"], joints_dict["joint4_weighting"])
+			print("===================speed:")
+			
+			print(speed_user)
+			print("===================acceleration:")
+			acceleration_user = calculate_acceleration(speed_user , prev_speed_user, 1/frame_fps_user)
+			print(acceleration_user)			
+			prev_speed_user = speed_user
+			#ADD===END
+
 
 			if ret_val_1 or ret_val:
 				error, _ = fastdtw(lmList_user, lmList_benchmark, dist=cosine)
@@ -216,6 +268,12 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 				if (positionWrite > 10):
 					cv2.putText(image_1, "FPS: %f" % (1.0 / (time.time() - fps_time)), (10, positionWrite),
 							cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+					#ADD===
+					cv2.putText(image_1, "Speed: %s" % ('{:.2f}'.format(speed_user)), (10, positionWrite-20),
+							cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
+					cv2.putText(image_1, "acceleration: %s" % ('{:.2f}'.format(acceleration_user)), (10, positionWrite-40),
+							cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)					
+					#ADD===END
 
 				# Display the dynamic accuracy of dance as the percentage of frames that appear as correct
 				if frame_counter==0:
@@ -278,7 +336,68 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 	os.remove(newBenchmark_video)
 	os.remove(newUser_video)
 	os.remove(output_filename)
+
+	#calc joints statistic
+	result_dict = calc_joints_stat(all_2d_points_user, all_3d_world_points_user)
+	
+	matched_count = round(100*correct_frames/benchmark_count, 2)
+	
+	result_dict["matched"] = matched_count
+	
+
 	if saved_frames > 1 and benchmark_count > 0:
-		return round(100*correct_frames/benchmark_count, 2)
+		return json.dumps(result_dict)
 	else:
 		return -1
+
+# return the dict contains joints calculation result	
+def calc_joints_stat(all_2d_points_user, all_3d_world_points_user):
+	result_dict = {}
+	#real world distance in meter to find out BODY SIZE
+	left_hip_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 23)
+	left_knee_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 25)
+	left_ankle_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 27)
+
+	right_hip_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 24)
+	right_knee_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 26)
+	right_ankle_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 28)
+
+	distiance_1 = get_avg_distinance_of_two_joint(left_hip_world_pos, left_knee_world_pos)
+	distiance_2 = get_avg_distinance_of_two_joint(left_knee_world_pos, left_ankle_world_pos)
+
+	distiance_3 = get_avg_distinance_of_two_joint(right_hip_world_pos, right_knee_world_pos)
+	distiance_4 = get_avg_distinance_of_two_joint(right_knee_world_pos, right_ankle_world_pos)
+
+
+	left_shoulder_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 11)
+	left_elbow_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 13)
+	left_wrist_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 15)
+
+	right_shoulder_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 12)
+	right_elbow_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 14)
+	right_wrist_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 16)
+
+	distiance_5 = get_avg_distinance_of_two_joint(left_shoulder_world_pos, left_elbow_world_pos)
+	distiance_6 = get_avg_distinance_of_two_joint(left_elbow_world_pos, left_wrist_world_pos)
+
+	distiance_7 = get_avg_distinance_of_two_joint(right_shoulder_world_pos, right_elbow_world_pos)
+	distiance_8 = get_avg_distinance_of_two_joint(right_elbow_world_pos, right_wrist_world_pos)
+
+	print("===================distance of left hip and left knee:")
+	print(distiance_1)
+
+	print("===================distance of left knee and left ankle:")
+	print(distiance_2)
+
+	result_dict["joint_distiance1"] = distiance_1
+	result_dict["joint_distiance2"] = distiance_2
+	result_dict["joint_distiance3"] = distiance_3
+	result_dict["joint_distiance4"] = distiance_4
+	result_dict["joint_distiance5"] = distiance_5
+	result_dict["joint_distiance6"] = distiance_6
+	result_dict["joint_distiance7"] = distiance_7
+	result_dict["joint_distiance8"] = distiance_8
+
+	#calc 
+	
+	return result_dict
