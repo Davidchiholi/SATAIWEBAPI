@@ -80,14 +80,14 @@ def posechecksat():
  #   equip2='NA'
     joints_dict = {}
     joints_list = joints.split(",")
-    joints_dict["joint1"] = joints_list[0]
-    joints_dict["joint1_weighting"] = joints_list[1]
-    joints_dict["joint2"] = joints_list[2]
-    joints_dict["joint2_weighting"] = joints_list[3]
-    joints_dict["joint3"] = joints_list[4]
-    joints_dict["joint3_weighting"] = joints_list[4]
-    joints_dict["joint4"] = joints_list[6]
-    joints_dict["joint4_weighting"] = joints_list[7]            
+    joints_dict["joint1"] = int(joints_list[0])
+    joints_dict["joint1_weighting"] = float(joints_list[1])
+    joints_dict["joint2"] = int(joints_list[2])
+    joints_dict["joint2_weighting"] = float(joints_list[3])
+    joints_dict["joint3"] = int(joints_list[4])
+    joints_dict["joint3_weighting"] = float(joints_list[4])
+    joints_dict["joint4"] = int(joints_list[6])
+    joints_dict["joint4_weighting"] = float(joints_list[7])          
     
     try:
         if (blobconn.startswith('DefaultEndpointsProtocol=https;AccountName=sportatousblob;') or blobconn == ''):

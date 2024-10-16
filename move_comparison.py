@@ -74,15 +74,27 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 	if (benchmark_video=='' or user_video==''):
 		return 0
 
-	benchmarkcontainer_client = ContainerClient.from_connection_string(conn_str=blob_connection, container_name=benchmark_blobcontainer)
-	newBenchmark_video = 'V'+str(time.strftime("%Y%m%d%H%M%S"))+str(random.randint(0,199999999)) + os.path.basename(benchmark_video)  
-	with open(file=newBenchmark_video, mode="wb") as download_filebm:
-		download_filebm.write(benchmarkcontainer_client.download_blob(benchmark_video).readall())
+	newBenchmark_video = ''
+	newUser_video = ''
+	if (benchmark_blobcontainer != ''):
+		benchmarkcontainer_client = ContainerClient.from_connection_string(conn_str=blob_connection, container_name=benchmark_blobcontainer)
+		newBenchmark_video = 'V'+str(time.strftime("%Y%m%d%H%M%S"))+str(random.randint(0,199999999)) + os.path.basename(benchmark_video)  
+		with open(file=newBenchmark_video, mode="wb") as download_filebm:
+			download_filebm.write(benchmarkcontainer_client.download_blob(benchmark_video).readall())
 	
-	usercontainer_client = ContainerClient.from_connection_string(conn_str=blob_connection, container_name=user_blobcontainer)
-	newUser_video = 'V'+str(time.strftime("%Y%m%d%H%M%S"))+str(random.randint(0,199999999)) + os.path.basename(user_video)  
-	with open(file=newUser_video, mode="wb") as download_fileur:
-		download_fileur.write(usercontainer_client.download_blob(user_video).readall())
+	if (user_blobcontainer != ''):
+		usercontainer_client = ContainerClient.from_connection_string(conn_str=blob_connection, container_name=user_blobcontainer)
+		newUser_video = 'V'+str(time.strftime("%Y%m%d%H%M%S"))+str(random.randint(0,199999999)) + os.path.basename(user_video)  
+		with open(file=newUser_video, mode="wb") as download_fileur:
+			download_fileur.write(usercontainer_client.download_blob(user_video).readall())
+
+	if (newBenchmark_video == ''):
+		newBenchmark_video = benchmark_video
+
+	if (newUser_video == ''):
+		newUser_video = user_video
+
+	print("video input:" + newBenchmark_video + " " + newUser_video)
 
 	benchmark_cam = cv2.VideoCapture(newBenchmark_video)
 	user_cam = cv2.VideoCapture(newUser_video) 
@@ -97,9 +109,13 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 	all_3d_world_points_user = list()
 	all_2d_points_benchmark = list()
 	all_3d_world_points_benchmark = list()
+	correct_frames_ratio_list = list()
 	prev_speed_user = 0
 	frame_fps_user = int(user_cam.get(5))  #fps
 	frame_fps_benchmark = int(benchmark_cam.get(5))  #fps
+	print("frame_fps:")
+	print(frame_fps_user)
+	print(frame_fps_benchmark)
 	#ADD===END
 
 	if h1 > w1:
@@ -147,6 +163,7 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 		user_count = user_cam.get(cv2.CAP_PROP_FRAME_COUNT)
 	frame_counter = 0
 	correct_frames = 0
+	current_frames_count = 0
 	saved_frames =0
 	if check_rate > 0.5 or check_rate < 0.01:
 		check_rate = 0.1
@@ -191,22 +208,26 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 			del lmList_benchmark_F[1:11]
 
 			frame_counter += 1
-			
+			#print("===================start landamrk:")
 			#ADD===
 			results = pose.process(image_1)
 			allpoints = (read_exact_landmark_positions_2d(results, w1, h1))
+			#print("===================start landamrk2:")
 			#print(allpoints)
 			allpoints_3d_world = (read_world_landmark_positions_3d(results))
 			all_2d_points_user.append(allpoints)
 			all_3d_world_points_user.append(allpoints_3d_world)
+			#print("===================start landamrk3:")
 			results = pose.process(image_2)
 			allpoints = (read_exact_landmark_positions_2d(results, w2, h2))
+			#print("===================start landamrk4:")
 			allpoints_3d_world = (read_world_landmark_positions_3d(results))
+			#print("===================start landamrk5:")
 			all_2d_points_benchmark.append(allpoints)
 			all_3d_world_points_benchmark.append(allpoints_3d_world)
-
+			#print("===================start landamrk6:")
 			#input joints point & weighting to calc speed
-			speed_user = calc_speed_on_weighting(all_2d_points_user, 1/frame_fps_user, joints_dict["joint1"], joints_dict["joint1_weighting"],joints_dict["joint2"], joints_dict["joint2_weighting"], joints_dict["joint3"], joints_dict["joint3_weighting"], joints_dict["joint4"], joints_dict["joint4_weighting"])
+			speed_user = calc_speed_on_weighting(all_3d_world_points_user, 1/frame_fps_user, joints_dict["joint1"], joints_dict["joint1_weighting"],joints_dict["joint2"], joints_dict["joint2_weighting"], joints_dict["joint3"], joints_dict["joint3_weighting"], joints_dict["joint4"], joints_dict["joint4_weighting"])
 			print("===================speed:")
 			
 			print(speed_user)
@@ -264,6 +285,13 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 					else:
 						cv2.putText(image_1,  "K.O.", (40, positionWrite),
 									cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+						
+				current_frames_count += 1
+
+				#calc corret rate at this moment
+				correct_frames_ratio_list.append(round(100*correct_frames/current_frames_count, 2))
+
+
 				positionWrite = nh1 - 270
 				if (positionWrite > 10):
 					cv2.putText(image_1, "FPS: %f" % (1.0 / (time.time() - fps_time)), (10, positionWrite),
@@ -332,17 +360,20 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 			print("An delete exception occurred:", error) # An exception occurred: division by zero
 			pass
 	
-	# Delete the file
-	os.remove(newBenchmark_video)
-	os.remove(newUser_video)
-	os.remove(output_filename)
+
+	if (benchmark_blobcontainer != ''):
+		# Delete the file
+		os.remove(newBenchmark_video)
+		os.remove(newUser_video)
+		os.remove(output_filename)
 
 	#calc joints statistic
-	result_dict = calc_joints_stat(all_2d_points_user, all_3d_world_points_user)
+	result_dict = calc_joints_stat(all_2d_points_user, all_3d_world_points_user, frame_fps_user, joints_dict)
 	
 	matched_count = round(100*correct_frames/benchmark_count, 2)
 	
 	result_dict["matched"] = matched_count
+	result_dict["matched_list"] = correct_frames_ratio_list
 	
 
 	if saved_frames > 1 and benchmark_count > 0:
@@ -351,7 +382,7 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 		return -1
 
 # return the dict contains joints calculation result	
-def calc_joints_stat(all_2d_points_user, all_3d_world_points_user):
+def calc_joints_stat(all_2d_points_user, all_3d_world_points_user, frame_fps_user, joints_dict):
 	result_dict = {}
 	#real world distance in meter to find out BODY SIZE
 	left_hip_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 23)
@@ -398,6 +429,21 @@ def calc_joints_stat(all_2d_points_user, all_3d_world_points_user):
 	result_dict["joint_distiance7"] = distiance_7
 	result_dict["joint_distiance8"] = distiance_8
 
-	#calc 
+	#calc speed
+	joint1_pos = get_mp_position_timeseries(all_3d_world_points_user, joints_dict["joint1"])
+	avg_speed = avg_speed_in_1_std(joint1_pos, 1/frame_fps_user)
+	result_dict["joint1_avg_speed"] = avg_speed
+
+	joint1_pos = get_mp_position_timeseries(all_3d_world_points_user, joints_dict["joint2"])
+	avg_speed = avg_speed_in_1_std(joint1_pos, 1/frame_fps_user)
+	result_dict["joint2_avg_speed"] = avg_speed
+
+	joint1_pos = get_mp_position_timeseries(all_3d_world_points_user, joints_dict["joint3"])
+	avg_speed = avg_speed_in_1_std(joint1_pos, 1/frame_fps_user)
+	result_dict["joint3_avg_speed"] = avg_speed
+
+	joint1_pos = get_mp_position_timeseries(all_3d_world_points_user, joints_dict["joint4"])
+	avg_speed = avg_speed_in_1_std(joint1_pos, 1/frame_fps_user)
+	result_dict["joint4_avg_speed"] = avg_speed
 	
 	return result_dict
