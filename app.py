@@ -85,7 +85,7 @@ def posechecksat():
     joints_dict["joint2"] = int(joints_list[2])
     joints_dict["joint2_weighting"] = float(joints_list[3])
     joints_dict["joint3"] = int(joints_list[4])
-    joints_dict["joint3_weighting"] = float(joints_list[4])
+    joints_dict["joint3_weighting"] = float(joints_list[5])
     joints_dict["joint4"] = int(joints_list[6])
     joints_dict["joint4_weighting"] = float(joints_list[7])          
     

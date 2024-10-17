@@ -228,12 +228,12 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 			#print("===================start landamrk6:")
 			#input joints point & weighting to calc speed
 			speed_user = calc_speed_on_weighting(all_3d_world_points_user, 1/frame_fps_user, joints_dict["joint1"], joints_dict["joint1_weighting"],joints_dict["joint2"], joints_dict["joint2_weighting"], joints_dict["joint3"], joints_dict["joint3_weighting"], joints_dict["joint4"], joints_dict["joint4_weighting"])
-			print("===================speed:")
+			#print("===================speed:")
 			
-			print(speed_user)
-			print("===================acceleration:")
+			#print(speed_user)
+			#print("===================acceleration:")
 			acceleration_user = calculate_acceleration(speed_user , prev_speed_user, 1/frame_fps_user)
-			print(acceleration_user)			
+			#print(acceleration_user)			
 			prev_speed_user = speed_user
 			#ADD===END
 
@@ -414,11 +414,11 @@ def calc_joints_stat(all_2d_points_user, all_3d_world_points_user, frame_fps_use
 	distiance_7 = get_avg_distinance_of_two_joint(right_shoulder_world_pos, right_elbow_world_pos)
 	distiance_8 = get_avg_distinance_of_two_joint(right_elbow_world_pos, right_wrist_world_pos)
 
-	print("===================distance of left hip and left knee:")
-	print(distiance_1)
+	#print("===================distance of left hip and left knee:")
+	#print(distiance_1)
 
-	print("===================distance of left knee and left ankle:")
-	print(distiance_2)
+	#print("===================distance of left knee and left ankle:")
+	#print(distiance_2)
 
 	result_dict["joint_distiance1"] = distiance_1
 	result_dict["joint_distiance2"] = distiance_2

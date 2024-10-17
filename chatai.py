@@ -1,0 +1,43 @@
+import os
+import json
+from openai import AzureOpenAI
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+
+# Initialize the Azure OpenAI client
+client = AzureOpenAI(
+    azure_endpoint = ("https://satmappopenai.openai.azure.com/"), 
+    api_key=("c9f6b19e555f49b18bbb6713ef8a1e4e"),  
+    api_version="2024-05-01-preview"
+)
+
+    
+deployment_name='satgpt4o' #This will correspond to the custom name you chose for your deployment when you deployed a model. Use a gpt-35-turbo-instruct deployment. 
+    
+# Send a completion call to generate an answer
+print('Sending a test completion job')
+
+f = open("Json.txt", "r")
+filecontent = f.read()
+#print(filecontent)
+
+result_dict = json.loads(filecontent)
+
+print(len(result_dict["matched_list"]))
+
+joint1_length = result_dict["joint_distiance1"]
+
+joint1_avg_speed = result_dict["joint1_avg_speed"]
+
+question = "JSON Content: " +  filecontent + " END of JSON Conent. matched_list in JOSON is the matching percentage between a user and a trainer sport action. Question is you need to describe the 'matched_list' trend. Length in meter between left hip and left knee is {joint1_length}. Describe this length compare to normal asian human. Average speed on Left knee is {joint1_avg_speed} meter/second. Describe this speed."
+
+response = client.chat.completions.create(
+    model="satgpt4o", # model = "deployment_name".
+    messages=[
+        {"role": "system", "content": "Use Chinese to reply. The user input JSON format data for analysis."},
+        {"role": "user", "content": question}
+    ]
+)
+
+print(response.choices[0].message.content)

@@ -5,26 +5,29 @@ from calclib.mp_data_extract_util import get_mp_position_timeseries
 def calc_speed_on_weighting(points,frame_speed,pos1,weighting1,pos2=0,weighting2=0,pos3=0,weighting3=0,pos4=0,weighting4=0):
 
     points_calc_1 = get_mp_position_timeseries(points, pos1)
-    pos1_speed = calculate_speed(points_calc_1[-2], points_calc_1[-2],frame_speed)
+    pos1_speed = calculate_speed(points_calc_1[-2], points_calc_1[-1],frame_speed)
+    #print("pos1 speed no weight : " + str(pos1_speed))
     pos1_speed = pos1_speed * weighting1
+    #print("pos1_speed : " + str(pos1_speed))
     pos2_speed=0
     pos3_speed=0
     pos4_speed=0
 
     if pos2 != 0 :
         points_calc_2 = get_mp_position_timeseries(points, pos2)
-        pos2_speed = calculate_speed(points_calc_2[-2], points_calc_2[-2],frame_speed)
+        pos2_speed = calculate_speed(points_calc_2[-2], points_calc_2[-1],frame_speed)
         pos2_speed = pos2_speed * weighting2
-
+        #print("pos2_speed : " + str(pos2_speed))
     if pos3 != 0 :
         points_calc_3 = get_mp_position_timeseries(points, pos3)
-        pos3_speed = calculate_speed(points_calc_3[-2], points_calc_3[-2],frame_speed)
+        pos3_speed = calculate_speed(points_calc_3[-2], points_calc_3[-1],frame_speed)
         pos3_speed = pos3_speed * weighting3        
-
+        #print("pos3_speed : " + str(pos3_speed) + " " + str(weighting3))
     if pos4 != 0 :
         points_calc_4 = get_mp_position_timeseries(points, pos4)
-        pos4_speed = calculate_speed(points_calc_4[-2], points_calc_4[-2],frame_speed)
+        pos4_speed = calculate_speed(points_calc_4[-2], points_calc_4[-1],frame_speed)
         pos4_speed = pos4_speed * weighting4        
+        #print("pos4_speed : " + str(pos4_speed))
 
     speed = pos1_speed + pos2_speed + pos3_speed + pos4_speed
 
@@ -61,10 +64,17 @@ def all_angle(points_a, points_b, points_c):
 
     return whole
 
-def calculate_speed(x, y, time):
+def calculate_speed(startpos, endpos, time):
+    #print(startpos)
+    #print(endpos)
+    displacement = np.sqrt((startpos[0] - endpos[0]) ** 2 + (startpos[1] - endpos[1]) ** 2 + (startpos[2] - endpos[2]) ** 2)
 
-    displacement = np.sqrt((x[1] - x[0]) ** 2 + (y[1] - y[0]) ** 2)
+    #print("calculate_speed displacement : " + str(displacement))
+
     speed = displacement / time if time != 0 else float('inf')  # Avoid division by zero
+
+    #print("calculate_speed : " + str(speed))
+
     return speed
 
 def calculate_acceleration(x, y, time):
@@ -83,6 +93,7 @@ def all_speed(points, frame_speed):
             prev_pt = pt
         else:
             whole = np.append(whole, calculate_speed(prev_pt, pt, frame_speed))
+            prev_pt = pt
 
     return whole
 
@@ -110,7 +121,7 @@ def avg_speed_in_1_std(points, frame_speed):
     standard_deviation = np.std(speeds)
     mean = np.mean(speeds)
 
-    print(f'mean={mean} and sd={standard_deviation}')
+    #print(f'mean={mean} and sd={standard_deviation}')
     
 
     point_in_1_sd = []
@@ -145,21 +156,3 @@ def get_avg_distinance_of_two_joint(points_a, points_b):
     return np.average(avg_array)
 
 
-
-#test 
-t1 = None
-t1x = 10
-t1y = 20
-
-w = np.array([t1x, t1y])    
-
-#print(w)
-#print(w[0])
-#print(w[1])
-
-pt = 20
-mean= 9
-standard_deviation = 3
-
-if pt <= mean + standard_deviation and pt >= mean - standard_deviation:
-    print(f'{pt}')
