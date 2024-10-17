@@ -42,7 +42,7 @@ print(question)
 response = client.chat.completions.create(
     model="satgpt4o", # model = "deployment_name".
     messages=[
-        {"role": "system", "content": "Use Chinese to reply. The user input JSON format data for analysis."},
+        {"role": "system", "content": "Use Traditional Chinese to reply."},
         {"role": "user", "content": question}
     ]
 )
