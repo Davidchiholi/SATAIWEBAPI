@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 # Initialize the Azure OpenAI client
 client = AzureOpenAI(
     azure_endpoint = ("https://satmappopenai.openai.azure.com/"), 
-    api_key=("c9f6b19e555f49b18bbb6713ef8a1e4e"),  
+    api_key=("XXXXXXXXXXXX"),  
     api_version="2024-05-01-preview"
 )
 
