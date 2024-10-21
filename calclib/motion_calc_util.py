@@ -3,7 +3,11 @@ import array
 from calclib.mp_data_extract_util import get_mp_position_timeseries
 
 def calc_speed_on_weighting(points,frame_speed,pos1,weighting1,pos2=0,weighting2=0,pos3=0,weighting3=0,pos4=0,weighting4=0):
-
+    #print("pos1_speed")
+    pos1_speed=0
+    if (len(points) < 2):
+        return 0
+    
     points_calc_1 = get_mp_position_timeseries(points, pos1)
     pos1_speed = calculate_speed(points_calc_1[-2], points_calc_1[-1],frame_speed)
     #print("pos1 speed no weight : " + str(pos1_speed))
