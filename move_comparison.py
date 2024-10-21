@@ -8,17 +8,11 @@ import pose_module as pm
 import numpy as np
 import mediapipe as mp
 ##new code end
-import sys
-from calclib.mp_data_extract_util import read_landmark_positions_3d
 from calclib.mp_data_extract_util import read_exact_landmark_positions_2d
 from calclib.mp_data_extract_util import get_mp_position_timeseries
 from calclib.mp_data_extract_util import read_world_landmark_positions_3d
 from calclib.motion_calc_util import avg_speed_in_1_std
-from calclib.motion_calc_util import avg_speed
-from calclib.motion_calc_util import all_angle
-from calclib.motion_calc_util import all_speed
 from calclib.motion_calc_util import calculate_acceleration
-from calclib.motion_calc_util import get_distinance_of_two_joint
 from calclib.motion_calc_util import get_avg_distinance_of_two_joint
 from calclib.motion_calc_util import calc_speed_on_weighting
 from scipy.spatial.distance import cosine
