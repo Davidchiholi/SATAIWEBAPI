@@ -10,11 +10,15 @@ def get_mp_position_timeseries(mp_landmarks, mp_joint_name):
     
     result_list = list()
   
-
+    #print("get_mp_position_timeseries 1")
+    #print(mp_landmarks)
     for pos in mp_landmarks:
-        result_list.append(pos[mp_joint_name])
+        if pos is not None:
+            result_list.append(pos[mp_joint_name])
+        else:
+            result_list.append(None)
       
-
+    #print("get_mp_position_timeseries 2")
     return result_list
 
 def read_exact_landmark_positions_2d(
@@ -44,7 +48,8 @@ def read_landmark_positions_3d(
 def read_world_landmark_positions_3d(
     results: any,
 ) -> npt.NDArray[np.float32] | None:
-    if results.pose_landmarks is None:
+    if results.pose_world_landmarks is None:
+        print("read_world_landmark_positions_3d is None")
         return None
     else:
         pose_landmarks = results.pose_world_landmarks.landmark

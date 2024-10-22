@@ -179,6 +179,7 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 #				cv2.namedWindow(winname)		   # Create a named window
 #				cv2.moveWindow(winname, 720,-100)  # Move it to desired location
 
+			image_user_org = image_1
 			image_1 = cv2.resize(image_1, (nw1,nh1))
 			image_1 = detector_1.findPose(image_1)
 			lmList_user = detector_1.findPosition(image_1)
@@ -192,6 +193,7 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 #				benchmark_cam.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
 			ret_val_1,image_2 = benchmark_cam.read()
+			image_benchmark_org = image_2
 			image_2 = cv2.resize(image_2, (nw2,nh2))
 			image_2F = cv2.flip(image_2, 1)
 			image_2 = detector_2.findPose(image_2)
@@ -202,17 +204,21 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 			del lmList_benchmark_F[1:11]
 
 			frame_counter += 1
-			#print("===================start landamrk:")
+			print("===================start landamrk: frame=" + str(current_frames_count))
 			#ADD===
-			results = pose.process(image_1)
+			results = pose.process(image_user_org)
+			#print("===================start landamrk 1.1:")
+			#print(results)
 			allpoints = (read_exact_landmark_positions_2d(results, w1, h1))
-			#print("===================start landamrk2:")
+			#print("===================start landamrk user 2D:")
 			#print(allpoints)
 			allpoints_3d_world = (read_world_landmark_positions_3d(results))
+			#print("===================start landamrk user 3D:")
+			#print(allpoints_3d_world)
 			all_2d_points_user.append(allpoints)
 			all_3d_world_points_user.append(allpoints_3d_world)
 			#print("===================start landamrk3:")
-			results = pose.process(image_2)
+			results = pose.process(image_benchmark_org)
 			allpoints = (read_exact_landmark_positions_2d(results, w2, h2))
 			#print("===================start landamrk4:")
 			allpoints_3d_world = (read_world_landmark_positions_3d(results))
@@ -221,7 +227,11 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 			all_3d_world_points_benchmark.append(allpoints_3d_world)
 			#print("===================start landamrk6:")
 			#input joints point & weighting to calc speed
-			speed_user = calc_speed_on_weighting(all_3d_world_points_user, 1/frame_fps_user, joints_dict["joint1"], joints_dict["joint1_weighting"],joints_dict["joint2"], joints_dict["joint2_weighting"], joints_dict["joint3"], joints_dict["joint3_weighting"], joints_dict["joint4"], joints_dict["joint4_weighting"])
+			try :
+				speed_user = calc_speed_on_weighting(all_3d_world_points_user, 1/frame_fps_user, joints_dict["joint1"], joints_dict["joint1_weighting"],joints_dict["joint2"], joints_dict["joint2_weighting"], joints_dict["joint3"], joints_dict["joint3_weighting"], joints_dict["joint4"], joints_dict["joint4_weighting"])
+			except Exception as error:
+				print("An exception at calc:", error) # An exception occurred: division by zero
+				pass
 			#print("===================speed:")
 			
 			#print(speed_user)
