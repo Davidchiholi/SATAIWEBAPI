@@ -96,7 +96,9 @@ def all_speed(points, frame_speed):
         if (len(prev_pt) == 0):
             prev_pt = pt
         else:
-            whole = np.append(whole, calculate_speed(prev_pt, pt, frame_speed))
+            if (pt is not None and prev_pt is not None) :
+                whole = np.append(whole, calculate_speed(prev_pt, pt, frame_speed))
+                
             prev_pt = pt
 
     return whole
@@ -154,8 +156,9 @@ def get_distinance_of_two_joint(points_a, points_b):
 def get_avg_distinance_of_two_joint(points_a, points_b):
     avg_array = []
     for index, item in enumerate(points_a):
-        dist = get_distinance_of_two_joint(item, points_b[index])
-        avg_array = np.append(avg_array, dist) 
+        if (item is not None):
+            dist = get_distinance_of_two_joint(item, points_b[index])
+            avg_array = np.append(avg_array, dist) 
   
     return np.average(avg_array)
 
