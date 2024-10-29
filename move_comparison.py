@@ -88,7 +88,7 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 	if (newUser_video == ''):
 		newUser_video = user_video
 
-	print("video input:" + newBenchmark_video + " " + newUser_video)
+	#print("video input:" + newBenchmark_video + " " + newUser_video)
 
 	benchmark_cam = cv2.VideoCapture(newBenchmark_video)
 	user_cam = cv2.VideoCapture(newUser_video) 
@@ -107,9 +107,9 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 	prev_speed_user = 0
 	frame_fps_user = int(user_cam.get(5))  #fps
 	frame_fps_benchmark = int(benchmark_cam.get(5))  #fps
-	print("frame_fps:")
-	print(frame_fps_user)
-	print(frame_fps_benchmark)
+	#print("frame_fps:")
+	#print(frame_fps_user)
+	#print(frame_fps_benchmark)
 	#ADD===END
 
 	if h1 > w1:
