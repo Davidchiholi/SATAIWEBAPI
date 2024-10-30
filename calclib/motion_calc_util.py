@@ -93,7 +93,7 @@ def all_speed(points, frame_speed):
     prev_pt = []
     whole = []
     for pt in points:
-        if (len(prev_pt) == 0):
+        if (prev_pt is None or len(prev_pt) == 0):
             prev_pt = pt
         else:
             if (pt is not None and prev_pt is not None) :

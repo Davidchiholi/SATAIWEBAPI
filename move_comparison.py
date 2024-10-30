@@ -15,6 +15,7 @@ from calclib.motion_calc_util import avg_speed_in_1_std
 from calclib.motion_calc_util import calculate_acceleration
 from calclib.motion_calc_util import get_avg_distinance_of_two_joint
 from calclib.motion_calc_util import calc_speed_on_weighting
+from calclib.motion_calc_util import calculate_angle
 from scipy.spatial.distance import cosine
 from fastdtw import fastdtw
 from azure.storage.blob import ContainerClient
@@ -387,6 +388,9 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 
 # return the dict contains joints calculation result	
 def calc_joints_stat(all_2d_points_user, all_3d_world_points_user, frame_fps_user, joints_dict):
+
+	mp_pose = mp.solutions.pose 
+
 	result_dict = {}
 	#real world distance in meter to find out BODY SIZE
 	left_hip_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 23)
@@ -449,5 +453,50 @@ def calc_joints_stat(all_2d_points_user, all_3d_world_points_user, frame_fps_use
 	joint1_pos = get_mp_position_timeseries(all_3d_world_points_user, joints_dict["joint4"])
 	avg_speed = avg_speed_in_1_std(joint1_pos, 1/frame_fps_user)
 	result_dict["joint4_avg_speed"] = avg_speed
+
+
+	# Calculate  Range of Motion ROM for Upper and Lower Body to reflect flexibility
+
+	# Variables to store angles
+	shoulder_angles =list()
+	elbow_angles = list()
+	hip_angles = list()
+	knee_angles = list()
+	
+	left_shoulder_pos = get_mp_position_timeseries(all_2d_points_user, mp_pose.PoseLandmark.LEFT_SHOULDER)
+	left_elbow_pos = get_mp_position_timeseries(all_2d_points_user, mp_pose.PoseLandmark.LEFT_ELBOW)
+	left_wrist_pos = get_mp_position_timeseries(all_2d_points_user, mp_pose.PoseLandmark.LEFT_WRIST)
+	left_hip_pos = get_mp_position_timeseries(all_2d_points_user, mp_pose.PoseLandmark.LEFT_HIP)
+	left_knee_pos = get_mp_position_timeseries(all_2d_points_user, mp_pose.PoseLandmark.LEFT_KNEE)
+	left_ankle_pos = get_mp_position_timeseries(all_2d_points_user, mp_pose.PoseLandmark.LEFT_ANKLE)
+
+	# Calculate shoulder and elbow angles
+	for indx, shoulder in enumerate(left_shoulder_pos):
+		if (shoulder is not None and left_elbow_pos[indx] is not None and left_wrist_pos[indx] is not None) :
+			elbow_angle = calculate_angle(shoulder, left_elbow_pos[indx], left_wrist_pos[indx])
+			shoulder_angle = calculate_angle(left_elbow_pos[indx] , shoulder, left_wrist_pos[indx])
+			
+			shoulder_angles.append(shoulder_angle)
+			elbow_angles.append(elbow_angle)
+
+	# Calculate hip and knee angles
+	for indx, hip in enumerate(left_hip_pos):
+		if (hip is not None and left_knee_pos[indx] is not None and left_ankle_pos[indx] is not None) :
+			knee_angle = calculate_angle(hip, left_knee_pos[indx], left_ankle_pos[indx])
+			hip_angle = calculate_angle(left_knee_pos[indx] , hip, left_ankle_pos[indx])
+			
+			hip_angles.append(hip_angle)
+			knee_angles.append(knee_angle)
+
+
+	shoulder_rom = max(shoulder_angles) - min(shoulder_angles)
+	elbow_rom = max(elbow_angles) - min(elbow_angles)
+	hip_rom = max(hip_angles) - min(hip_angles)
+	knee_rom = max(knee_angles) - min(knee_angles)
+
+	print(f'Range of Motion for Shoulder: {shoulder_rom:.2f} degrees')
+	print(f'Range of Motion for Elbow: {elbow_rom:.2f} degrees')
+	print(f'Range of Motion for Hip: {hip_rom:.2f} degrees')
+	print(f'Range of Motion for Knee: {knee_rom:.2f} degrees')
 	
 	return result_dict
