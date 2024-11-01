@@ -81,12 +81,55 @@ def calculate_speed(startpos, endpos, time):
 
     return speed
 
+def calculate_2d_speed(startpos, endpos, time):
+    #print(startpos)
+    #print(endpos)
+    displacement = np.sqrt((startpos[0] - endpos[0]) ** 2 + (startpos[1] - endpos[1]) ** 2 )
+
+    #print("calculate_speed displacement : " + str(displacement))
+
+    speed = displacement / time if time != 0 else float('inf')  # Avoid division by zero
+
+    #print("calculate_speed : " + str(speed))
+
+    return speed
+
 def calculate_acceleration(x, y, time):
 
     change_of_speed = y - x
     acceleration = change_of_speed / time if time != 0 else float('inf')  # Avoid division by zero
     return acceleration
 
+def calculate_acceleration_from_joints(landmarks_pos_array, time):
+    
+    result_list = list()
+
+    prev_position = None
+    prev_velocity = None
+    acceleration = None
+    velocity = None
+
+    for pos in landmarks_pos_array:
+        if (pos is not None):
+            current_position = pos
+
+        if prev_position is not None:
+            # Calculate velocity as change in position
+            velocity = calculate_speed(prev_position, current_position, time)
+
+            if prev_velocity is not None:
+                # Calculate acceleration as change in velocity
+                acceleration = (velocity - prev_velocity) / time
+
+        # Update previous values
+        prev_velocity = velocity
+
+        # Update the previous knee position
+        prev_position = current_position
+        if (acceleration is not None):
+            result_list.append(acceleration)
+
+    return result_list
 
 def all_speed(points, frame_speed):
 
@@ -162,4 +205,39 @@ def get_avg_distinance_of_two_joint(points_a, points_b):
   
     return np.average(avg_array)
 
+
+def get_joint_name(joint_number) :    
+    if (joint_number == 1): return 'Nose'
+    if (joint_number == 2): return 'Left Eye Inner'
+    if (joint_number == 3): return 'Left Eye'
+    if (joint_number == 4): return 'Left Eye Outer'
+    if (joint_number == 5): return 'Right Eye Inner'
+    if (joint_number == 6): return 'Right Eye'
+    if (joint_number == 7): return 'Right Eye Outer'
+    if (joint_number == 8): return 'Left Ear Tip'
+    if (joint_number == 9): return 'Right Ear Tip'
+    if (joint_number == 10): return 'Mouth Left'
+    if (joint_number == 11): return 'Mouth Right'
+    if (joint_number == 12): return 'Left Shoulder'
+    if (joint_number == 13): return 'Right Shoulder'
+    if (joint_number == 14): return 'Left Elbow'
+    if (joint_number == 15): return 'Right Elbow'
+    if (joint_number == 16): return 'Left Wrist'
+    if (joint_number == 17): return 'Right Wrist'
+    if (joint_number == 18): return 'Left Pinky'
+    if (joint_number == 19): return 'Right Pinky'
+    if (joint_number == 20): return 'Left Index'
+    if (joint_number == 21): return 'Right Index'
+    if (joint_number == 22): return 'Left Thumb'
+    if (joint_number == 23): return 'Right Thumb'
+    if (joint_number == 24): return 'Left Hip'
+    if (joint_number == 25): return 'Right Hip'
+    if (joint_number == 26): return 'Left Knee'
+    if (joint_number == 27): return 'Right Knee'
+    if (joint_number == 28): return 'Left Ankle'
+    if (joint_number == 29): return 'Right Ankle'
+    if (joint_number == 30): return 'Left Heel'
+    if (joint_number == 31): return 'Right Heel'
+    if (joint_number == 32): return 'Left Foot Index'
+    if (joint_number == 33): return 'Right Foot Index'
 

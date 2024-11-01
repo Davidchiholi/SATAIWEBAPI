@@ -87,12 +87,18 @@ def posechecksat():
     joints_dict["joint3"] = int(joints_list[4])
     joints_dict["joint3_weighting"] = float(joints_list[5])
     joints_dict["joint4"] = int(joints_list[6])
-    joints_dict["joint4_weighting"] = float(joints_list[7])          
+    joints_dict["joint4_weighting"] = float(joints_list[7]) 
+
+    # check if the enable of face landmark exist
+    if (len(joints_list) > 8) :
+        joints_dict["joint5"] = 0 # this field ignore  
+        joints_dict["enable_face_landmark"] = int(joints_list[9])         
     
     try:
         if (blobconn.startswith('DefaultEndpointsProtocol=https;AccountName=sportatousblob;') or blobconn == ''):
 #            print('Request for ai pose comparison')
             returncode = compare_positions(inputbenchmarkfile, inputplayerfile, inputbenchmarkblobcontainer, inputplayerblobcontainer, outputblobfilename ,outputblobfullfilename,outputblobcontainer,checkrate_in_decimal,blobconn,sport, False, True, deletedblob, model, equip, model1, equip1, model2, equip2, joints_dict)
+            print(returncode)
             return make_response(jsonify(returncode), 200)
         else:
             return  make_response(jsonify(-1), 400)

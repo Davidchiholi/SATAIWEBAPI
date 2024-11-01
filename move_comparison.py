@@ -16,6 +16,8 @@ from calclib.motion_calc_util import calculate_acceleration
 from calclib.motion_calc_util import get_avg_distinance_of_two_joint
 from calclib.motion_calc_util import calc_speed_on_weighting
 from calclib.motion_calc_util import calculate_angle
+from calclib.motion_calc_util import calculate_acceleration_from_joints
+from calclib.motion_calc_util import get_joint_name
 from scipy.spatial.distance import cosine
 from fastdtw import fastdtw
 from azure.storage.blob import ContainerClient
@@ -201,8 +203,14 @@ def compare_positions(benchmark_video, user_video, benchmark_blobcontainer, user
 			image_2F = detector_2F.findPose(image_2F)
 			lmList_benchmark = detector_2.findPosition(image_2)
 			lmList_benchmark_F = detector_2F.findPosition(image_2F)
-			del lmList_benchmark[1:11]
-			del lmList_benchmark_F[1:11]
+
+			is_enable_face_lankmark = joints_dict.get("enable_face_landmark")
+			if (is_enable_face_lankmark is not None and is_enable_face_lankmark > 0):
+				# not delete the face landmarks
+				pass
+			else:
+				del lmList_benchmark[1:11]
+				del lmList_benchmark_F[1:11]
 
 			frame_counter += 1
 			print("===================start landamrk: frame=" + str(current_frames_count))
@@ -401,11 +409,11 @@ def calc_joints_stat(all_2d_points_user, all_3d_world_points_user, frame_fps_use
 	right_knee_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 26)
 	right_ankle_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 28)
 
-	distiance_1 = get_avg_distinance_of_two_joint(left_hip_world_pos, left_knee_world_pos)
-	distiance_2 = get_avg_distinance_of_two_joint(left_knee_world_pos, left_ankle_world_pos)
+	distance_1 = get_avg_distinance_of_two_joint(left_hip_world_pos, left_knee_world_pos)
+	distance_2 = get_avg_distinance_of_two_joint(left_knee_world_pos, left_ankle_world_pos)
 
-	distiance_3 = get_avg_distinance_of_two_joint(right_hip_world_pos, right_knee_world_pos)
-	distiance_4 = get_avg_distinance_of_two_joint(right_knee_world_pos, right_ankle_world_pos)
+	distance_3 = get_avg_distinance_of_two_joint(right_hip_world_pos, right_knee_world_pos)
+	distance_4 = get_avg_distinance_of_two_joint(right_knee_world_pos, right_ankle_world_pos)
 
 
 	left_shoulder_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 11)
@@ -416,11 +424,11 @@ def calc_joints_stat(all_2d_points_user, all_3d_world_points_user, frame_fps_use
 	right_elbow_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 14)
 	right_wrist_world_pos = get_mp_position_timeseries(all_3d_world_points_user, 16)
 
-	distiance_5 = get_avg_distinance_of_two_joint(left_shoulder_world_pos, left_elbow_world_pos)
-	distiance_6 = get_avg_distinance_of_two_joint(left_elbow_world_pos, left_wrist_world_pos)
+	distance_5 = get_avg_distinance_of_two_joint(left_shoulder_world_pos, left_elbow_world_pos)
+	distance_6 = get_avg_distinance_of_two_joint(left_elbow_world_pos, left_wrist_world_pos)
 
-	distiance_7 = get_avg_distinance_of_two_joint(right_shoulder_world_pos, right_elbow_world_pos)
-	distiance_8 = get_avg_distinance_of_two_joint(right_elbow_world_pos, right_wrist_world_pos)
+	distance_7 = get_avg_distinance_of_two_joint(right_shoulder_world_pos, right_elbow_world_pos)
+	distance_8 = get_avg_distinance_of_two_joint(right_elbow_world_pos, right_wrist_world_pos)
 
 	#print("===================distance of left hip and left knee:")
 	#print(distiance_1)
@@ -428,14 +436,14 @@ def calc_joints_stat(all_2d_points_user, all_3d_world_points_user, frame_fps_use
 	#print("===================distance of left knee and left ankle:")
 	#print(distiance_2)
 
-	result_dict["joint_distiance1"] = distiance_1
-	result_dict["joint_distiance2"] = distiance_2
-	result_dict["joint_distiance3"] = distiance_3
-	result_dict["joint_distiance4"] = distiance_4
-	result_dict["joint_distiance5"] = distiance_5
-	result_dict["joint_distiance6"] = distiance_6
-	result_dict["joint_distiance7"] = distiance_7
-	result_dict["joint_distiance8"] = distiance_8
+	result_dict["left_hip_keen_distance"] = distance_1
+	result_dict["left_keen_ankle_distance"] = distance_2
+	result_dict["right_hip_keen_distance"] = distance_3
+	result_dict["right_keen_ankle_distance"] = distance_4
+	result_dict["left_shoulder_elbow_distance"] = distance_5
+	result_dict["left_elbow_wrist_distance"] = distance_6
+	result_dict["right_shoulder_elbow_distance"] = distance_7
+	result_dict["right_elbow_wrist_distance"] = distance_8
 
 	#calc speed
 	joint1_pos = get_mp_position_timeseries(all_3d_world_points_user, joints_dict["joint1"])
@@ -494,9 +502,26 @@ def calc_joints_stat(all_2d_points_user, all_3d_world_points_user, frame_fps_use
 	hip_rom = max(hip_angles) - min(hip_angles)
 	knee_rom = max(knee_angles) - min(knee_angles)
 
-	print(f'Range of Motion for Shoulder: {shoulder_rom:.2f} degrees')
-	print(f'Range of Motion for Elbow: {elbow_rom:.2f} degrees')
-	print(f'Range of Motion for Hip: {hip_rom:.2f} degrees')
-	print(f'Range of Motion for Knee: {knee_rom:.2f} degrees')
+	#print(f'Range of Motion for Shoulder: {shoulder_rom:.2f} degrees')
+	#print(f'Range of Motion for Elbow: {elbow_rom:.2f} degrees')
+	#print(f'Range of Motion for Hip: {hip_rom:.2f} degrees')
+	#print(f'Range of Motion for Knee: {knee_rom:.2f} degrees')
+
+	result_dict["shoulder_rom"] = shoulder_rom
+	result_dict["elbow_rom"] = elbow_rom
+	result_dict["hip_rom"] = hip_rom
+	result_dict["knee_rom"] = knee_rom
+
+# calc accleration of joints_dict["joint1"]
+	joint1_pos_for_acc = get_mp_position_timeseries(all_3d_world_points_user, joints_dict["joint1"])
+	joint1_acc_result = calculate_acceleration_from_joints(joint1_pos_for_acc, 1/frame_fps_user)
+	#print(f'joint1_acc_result')
+	#print(joint1_acc_result)
+	result_dict["joint1_max_acceleration"] = max(joint1_acc_result)
+
+	result_dict["joint1_name"] = get_joint_name(joints_dict["joint1"])
+	result_dict["joint2_name"] = get_joint_name(joints_dict["joint2"])
+	result_dict["joint3_name"] = get_joint_name(joints_dict["joint3"])
+	result_dict["joint4_name"] = get_joint_name(joints_dict["joint4"])
 	
 	return result_dict
